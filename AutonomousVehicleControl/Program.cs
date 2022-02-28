@@ -10,135 +10,168 @@ namespace AutonomousVehicleControl
         }
     }
 
-    class Silnice
+    public class Silnice
     {
-        string jmeno
-        string Jmeno
+        private string jmeno;
+        public string Jmeno
         {
-            get => return jmeno; //jmeno silnice
+            get => jmeno; //jmeno silnice
             set => jmeno = value;
         }
-        double maxrychlost;  // maximální možná rychlost na sinici
-        double Maxrychos 
+
+        private double maxRychlost;  // maximální možná rychlost na sinici
+        public double MaxRychlost 
         {
-            get => return maxrychlost;
-            set => maxrychost = value;
+            get => maxRychlost;
+            set => maxRychlost = value;
         }
-        double delka;   // jak dlouhá je silnice
-        double Delka
+
+        private double delka;   // jak dlouhá je silnice
+        public double Delka
         {
-            get => return delka;
+            get => delka;
             set => Delka = value;
         }
-        public double Left(double d) // dostane novou maxrychlost když opustí část silnice
+
+        /// <summary>
+        /// Metoda, ktera se zavola kdyz auto sjede z teto silnice
+        /// </summary>
+        /// <param name="auto">Auto, ktere sjelo ze silnice</param>
+        public virtual void Left(Auto auto) // dostane novou maxrychlost když opustí část silnice
         {
-            double rychlost
-            return rychlost;
+
         }
-        public double Entered(double d) // změna při opuštění oblasti
+
+        /// <summary>
+        /// Metoda, ktera se zavola kdyz auto vjede na tuto silnici
+        /// </summary>
+        /// <param name="auto">Auto, ktere najelo na silnici</param>
+        public virtual void Entered(Auto auto) // změna při opuštění oblasti
         {
-            double rychlost
-            return rychlost;
+            // TODO zmenit rychlost
+            auto.Rychlost = MaxRychlost;
         }
            
     }
-    class Most : Silnice
+
+    public class Most : Silnice
     {
-        public override double Entered(double d) // zmení se rychlost podle počasí
+        public override void Entered(Auto auto) // zmení se rychlost podle počasí
         {
-            double rychlost
-            return rychlost;
+            base.Entered(auto);
+            throw new NotImplementedException();
         }
 
     }
-    class Tunel: Silnice
+
+    public class Tunel : Silnice
     {
-        public override double Left(double d) // změní se stav světel a rychlost 
+        public override void Left(Auto auto) // změní se stav světel a rychlost 
         {
-            double rychlost
-            return rychlost;
+            base.Left(auto);
+            throw new NotImplementedException();
         }
-        public override double Entered(double d) // změní se stav světel a rychlost
+
+        public override void Entered(Auto auto) // změní se stav světel a rychlost
         {
-            double rychlost
-            return rychlost;
+            base.Entered(auto);
+            throw new NotImplementedException();
         }
         
 
     }
-    class BeznaCesta : Silnice
+
+    public class BeznaCesta : Silnice
     {
 
     }
-    class Auto
+
+    public class Lokace
     {
-        double rychlost;
-        double Rychlost
+        //TODO kostra lokace
+    }
+
+    public class RoadChangedEventArgs : EventArgs
+    {
+        public Silnice Silnice { get; set; }
+        public Lokace VehicleLocation { get; set; }
+    }
+
+    public class Auto
+    {
+        public event EventHandler<RoadChangedEventArgs> NewRoadEntered;
+
+        private double rychlost;
+        public double Rychlost
         {
-            get => return rychlost;
+            get => rychlost;
             set => rychlost = value;
         }
-        double trasa;
-        double Trasa
+
+        private double trasa;
+        public double Trasa
         {
-            get => return trasa;
+            get => trasa;
             set => trasa = value;
         }
-        double poloha;
-        double Poloha
+
+        private Lokace poloha;
+        public Lokace Poloha
         {
-            get => return poloha;
+            get => poloha;
             set => poloha = value;
         }
-        bool stav_svetel;
-        bool Stav_svetel
+
+        private bool stavSvetel;
+        public bool StavSvetel
         {
-            get => return stav_svetel;
-            set => stav_svetel = value;
+            get => stavSvetel;
+            set => stavSvetel = value;
         }
-        
+
         public void porucha() // vyvolá metodu z Ridiciho systemu podle typu poruchy
         {
-
+            throw new NotImplementedException();
         }
-
     }
-    class RidiciSystem
+
+    public class RidiciSystem
     {
         public double GetMostRychlost() // Vytvoří rychlost podle pomocí počasí (zeptá se MeteroStredisko)
         {
-            double rychlost
-            return rychlost;
+            throw new NotImplementedException();
         }
         public void HorsiPorucha() //
         {
-
+            throw new NotImplementedException();
         }
         public void LepsiPorucha()
         {
-
+            throw new NotImplementedException();
         }
     }
-    class MeteroStredisko
+
+    public class MeteroStredisko
     {
         public string GetPocasi() // dostaneme pocasi
         {
-
+            throw new NotImplementedException();
         }
     }
-    class ServisStedisko
+
+    public class ServisStedisko
     {
         public void OdvezAuto() // Vyžáda nový auto pote dá mu trasu k porouchanému vozidlu a pak ho odveze
         {
-
+            throw new NotImplementedException();
         }
         public void NovyAuto() // vytvoří auto v Servisu
         {
-
+            throw new NotImplementedException();
         }
         public double GetTrasuKServisu(double poloha) // Dostane cestu od aouta k nejbližšímu servisu
         {
-
+            throw new NotImplementedException();
         }
     }
 }
