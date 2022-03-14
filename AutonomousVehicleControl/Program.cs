@@ -247,12 +247,12 @@ namespace AutonomousVehicleControl
 
         private void VyresTezkouPoruchu(Auto auto) //
         {
-            ServisStedisko.ChciNahradniAuto(new List<Silnice>(), auto);
+            ServisStredisko.ChciNahradniAuto(new List<Silnice>(), auto);
         }
 
         private void VyresLehkouPoruchu(Auto auto)
         {
-            ServisStedisko.ChciNahradniAuto(ServisStedisko.GetTrasaKServisu(auto.Poloha), auto);
+            ServisStredisko.ChciNahradniAuto(ServisStredisko.GetTrasaKServisu(auto.Poloha), auto);
 
         }
 
