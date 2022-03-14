@@ -9,7 +9,25 @@ namespace AutonomousVehicleControl
     {
         static void Main(string[] args)
         {
+            List<Silnice> trasa = new List<Silnice>()
+            {
+                new Silnice(200, "prvni silnice", 1),
+                new Most("prvni most", .2),
+                new Tunel("prvni tunel", .4)
+            };
+            RidiciSystem ridiciSystem = new RidiciSystem();
+            Auto auto = ridiciSystem.CreateAuto(trasa, "auto");
+            auto.OnPorucha += (sender, e) =>            Console.WriteLine($"{GetJmenoObecnehoAuta(sender)}: Chyba! Chybovy kód: {e.ChybovyKod}");
+            auto.DruhSilniceChanged += (sender, e) =>   Console.WriteLine($"{GetJmenoObecnehoAuta(sender)}: Zmena typu silnice na: " + e.Silnice.GetType().Name);
+            auto.NewSilniceEntered += (sender, e) =>    Console.WriteLine($"{GetJmenoObecnehoAuta(sender)}: Auto prejelo na novou silnici: {e.Silnice}");
+            auto.OnTrasaDokoncena += (sender, e) =>     Console.WriteLine($"{GetJmenoObecnehoAuta(sender)}: Trasa dokoncena");
+            auto.RychlostChanged += (sender, e) =>      Console.WriteLine($"{GetJmenoObecnehoAuta(sender)}: Zmena rychlosti na: {(sender as Auto).Rychlost}");
+            auto.StavSvetelChanged += (sender, e) =>    Console.WriteLine($"{GetJmenoObecnehoAuta(sender)}: Zmena stavu svetel: {(sender as Auto).StavSvetel}");
 
+            ridiciSystem.SpustTrasuVAute(auto);
+
+            Console.ReadLine();
+            string GetJmenoObecnehoAuta(object auto) => ((Auto)auto).Jmeno;
         }
     }
 
@@ -40,7 +58,7 @@ namespace AutonomousVehicleControl
         public double Delka
         {
             get => delka;
-            set => Delka = value;
+            set => delka = value;
         }
 
         /// <summary>
@@ -58,10 +76,13 @@ namespace AutonomousVehicleControl
         /// <param name="auto">Auto, ktere najelo na silnici</param>
         public virtual void Entered(Auto auto) // změna při opuštění oblasti
         {
-            // TODO zmenit rychlost
             auto.Rychlost = MaxRychlost;
         }
 
+        public override string ToString()
+        {
+            return $"{Jmeno} {{Delka: {Delka}; MaxRychlost: {MaxRychlost}}}";
+        }
     }
 
     public class Most : Silnice
@@ -132,15 +153,15 @@ namespace AutonomousVehicleControl
         public event EventHandler<PoruchaEventArgs> OnPorucha;
         public event EventHandler<EventArgs> OnTrasaDokoncena;
 
-        public string SPZ { get; }
+        public string Jmeno { get; }
         public List<Silnice> Trasa = new List<Silnice>();
         public Silnice CurrSilnice { get; private set; }
 
-        internal Auto(RidiciSystem ridiciSystem, List<Silnice> trasa, string spz)
+        internal Auto(RidiciSystem ridiciSystem, List<Silnice> trasa, string jmeno)
         {
             RidiciSystem = ridiciSystem;
             Trasa = trasa;
-            SPZ = spz;
+            Jmeno = jmeno;
         }
 
         private double rychlost;
@@ -186,20 +207,21 @@ namespace AutonomousVehicleControl
                 CurrSilnice = Trasa[i];
 
                 NewSilniceEntered?.Invoke(this, new SilniceChangedEventArgs() { Silnice = CurrSilnice, VehicleLocation = Poloha });
-                if (!lastSilnice.GetType().Equals(CurrSilnice.GetType()))
+                if (lastSilnice != null && !lastSilnice.GetType().Equals(CurrSilnice.GetType()))
                     DruhSilniceChanged?.Invoke(this, new SilniceChangedEventArgs() { Silnice = CurrSilnice, VehicleLocation = Poloha });
                 lastSilnice = CurrSilnice;
 
                 CurrSilnice.Entered(this);
 
-                bool staneSeChyba = rnd.Next(100) == 0;
+                //TODO implementovat dynamicky vyvolavani chyb
+                bool staneSeChyba = false;// rnd.Next(100) == 0;
 
                 double cilovaVzdalenost = CurrSilnice.Delka;
 
                 if (staneSeChyba)
                     cilovaVzdalenost *= rnd.NextDouble();
 
-                double dobaJizdy = cilovaVzdalenost * Rychlost * 3600 * 1000 * RidiciSystem.TimeScale;
+                double dobaJizdy = (cilovaVzdalenost / Rychlost) * 3600 * 1000 * RidiciSystem.TimeScale;
 
                 await Task.Delay((int)dobaJizdy);
 
@@ -258,9 +280,9 @@ namespace AutonomousVehicleControl
 
         }
 
-        public Auto CreateAuto(List<Silnice> trasa, string spz)
+        public Auto CreateAuto(List<Silnice> trasa, string jmeno)
         {
-            return new Auto(this, trasa, spz);
+            return new Auto(this, trasa, jmeno);
         }
 
         public void SpustTrasuVAute(Auto auto)
@@ -305,7 +327,7 @@ namespace AutonomousVehicleControl
             }
 
 
-            Auto nahrada = auto.RidiciSystem.CreateAuto(zbyvajiciSilnice, "nahrada za " + auto.SPZ);
+            Auto nahrada = auto.RidiciSystem.CreateAuto(zbyvajiciSilnice, "nahrada za " + auto.Jmeno);
             auto.OnTrasaDokoncena += (sender, e) => nahrada.RidiciSystem.SpustTrasuVAute(nahrada);
         }
 
