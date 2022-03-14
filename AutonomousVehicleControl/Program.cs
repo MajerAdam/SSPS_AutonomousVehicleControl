@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AutonomousVehicleControl
@@ -35,7 +36,7 @@ namespace AutonomousVehicleControl
             set => maxRychlost = value;
         }
 
-        private double delka;   // jak dlouhá je silnice
+        private double delka; // jak dlouhá je silnice
         public double Delka
         {
             get => delka;
@@ -166,7 +167,7 @@ namespace AutonomousVehicleControl
             private set;
         }
 
-        private Random rnd = new Random();
+        private ThreadSafeRandom rnd = new ThreadSafeRandom();
         public ChybovyKod VyvolatPoruchu() // vyvolá metodu z Ridiciho systemu podle typu poruchy
         {
             ChybovyKod chyba = (ChybovyKod)rnd.Next(2);
@@ -175,7 +176,7 @@ namespace AutonomousVehicleControl
             return chyba;
         }
 
-        public async Task ProvedTrasu()
+        internal async Task ProvedTrasu()
         {
             Silnice lastSilnice = null;
             for (int i = 0; i < Trasa.Count; i++)
@@ -189,7 +190,7 @@ namespace AutonomousVehicleControl
 
                 CurrSilnice.Entered(this);
 
-                bool staneSeChyba = rnd.Next(0, 100) == 0;
+                bool staneSeChyba = rnd.Next(100) == 0;
 
                 double cilovaVzdalenost = CurrSilnice.Delka;
 
@@ -214,6 +215,8 @@ namespace AutonomousVehicleControl
     public class RidiciSystem
     {
         public static double TimeScale = 1;
+
+        public List<Task> AutoTasks = new List<Task>();
 
         public double GetMostRychlost(Auto auto) // Vytvoří rychlost podle pomocí počasí (zeptá se MeteroStredisko)
         {
@@ -244,22 +247,23 @@ namespace AutonomousVehicleControl
 
         private void VyresTezkouPoruchu(Auto auto) //
         {
-            throw new NotImplementedException();
+            ServisStedisko.ChciNahradniAuto(new List<Silnice>(), auto);
         }
 
-        private Random rnd = new Random();
         private void VyresLehkouPoruchu(Auto auto)
         {
-            //TODO pridej do trasy cestu k servisu a tam dej novy auto
-            int index = auto.Trasa.IndexOf(auto.CurrSilnice);
-            auto.Trasa.RemoveRange(index + 1, auto.Trasa.Count - index);
-            auto.Trasa.Add(new Silnice(30, "Cesta do servisu", rnd.NextDouble() * 5 + 1));
+            ServisStedisko.ChciNahradniAuto(ServisStedisko.GetTrasaKServisu(auto.Poloha), auto);
 
         }
 
         public Auto CreateAuto(List<Silnice> trasa, string spz)
         {
             return new Auto(this, trasa, spz);
+        }
+
+        public void SpustTrasuVAute(Auto auto)
+        {
+            AutoTasks.Add(auto.ProvedTrasu());
         }
     }
 
@@ -272,26 +276,71 @@ namespace AutonomousVehicleControl
 
     public static class MeteoStredisko
     {
-        private static Random rnd = new Random();
+        private static ThreadSafeRandom rnd = new ThreadSafeRandom();
         public static Pocasi GetPocasi(Lokace lokace) // dostaneme pocasi
         {
             return (Pocasi)rnd.Next(3);
         }
     }
 
-    public class ServisStedisko
+    public static class ServisStredisko
     {
-        public void OdvezAuto() // Vyžáda nový auto pote dá mu trasu k porouchanému vozidlu a pak ho odveze
+        private static ThreadSafeRandom rnd = new ThreadSafeRandom();
+
+        public static void ChciNahradniAuto(List<Silnice> trasaDoMistaSetkani, Auto auto)
         {
-            throw new NotImplementedException();
+            bool predChybou = true;
+            List<Silnice> zbyvajiciSilnice = new List<Silnice>();
+            zbyvajiciSilnice.AddRange(trasaDoMistaSetkani.AsEnumerable().Reverse());
+
+            foreach (var ii in auto.Trasa)
+            {
+                if (!predChybou)
+                    zbyvajiciSilnice.Add(ii);
+                if (ii == auto.CurrSilnice)
+                    predChybou = false;
+                    continue;
+            }
+
+
+            Auto nahrada = auto.RidiciSystem.CreateAuto(zbyvajiciSilnice, "nahrada za " + auto.SPZ);
+            auto.OnTrasaDokoncena += (sender, e) => nahrada.RidiciSystem.SpustTrasuVAute(nahrada);
         }
-        public void NovyAuto() // vytvoří auto v Servisu
+
+        public static List<Silnice> GetTrasaKServisu(Lokace poloha) // Dostane cestu od aouta k nejbližšímu servisu
         {
-            throw new NotImplementedException();
+            return new List<Silnice>() { new Silnice(30, "Cesta do servisu", rnd.NextDouble() * 5 + 1) }; 
         }
-        public double GetTrasaKServisu(double poloha) // Dostane cestu od aouta k nejbližšímu servisu
+    }
+
+    public class ThreadSafeRandom
+    {
+        private static readonly Random _global = new Random();
+        [ThreadStatic] private static Random _local;
+
+        private void CheckLocal()
         {
-            throw new NotImplementedException();
+            if (_local == null)
+            {
+                int seed;
+                lock (_global)
+                {
+                    seed = _global.Next();
+                }
+                _local = new Random(seed);
+            }
+        }
+
+        public int Next(int max)
+        {
+            CheckLocal();
+            return _local.Next(max);
+        }
+
+        public double NextDouble()
+        {
+            CheckLocal();
+            return _local.NextDouble();
         }
     }
 }
