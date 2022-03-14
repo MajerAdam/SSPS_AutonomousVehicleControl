@@ -127,8 +127,8 @@ namespace AutonomousVehicleControl
     {
         public event EventHandler<SilniceChangedEventArgs> NewSilniceEntered;
         public event EventHandler<SilniceChangedEventArgs> DruhSilniceChanged;
-        public event EventHandler<EventArgs> RychlostChanged; //TODO
-        public event EventHandler<EventArgs> StavSvetelChanged; //TODO
+        public event EventHandler<EventArgs> RychlostChanged;
+        public event EventHandler<EventArgs> StavSvetelChanged;
         public event EventHandler<PoruchaEventArgs> OnPorucha;
         public event EventHandler<EventArgs> OnTrasaDokoncena;
 
@@ -143,10 +143,11 @@ namespace AutonomousVehicleControl
             SPZ = spz;
         }
 
+        private double rychlost;
         public double Rychlost
         {
-            get;
-            set;
+            get => rychlost;
+            set { rychlost = value; RychlostChanged?.Invoke(this, EventArgs.Empty); }
         }
 
         public Lokace Poloha
@@ -155,10 +156,11 @@ namespace AutonomousVehicleControl
             set;
         }
 
+        private bool stavSvetel;
         public bool StavSvetel
         {
-            get;
-            set;
+            get => stavSvetel;
+            set { stavSvetel = value; StavSvetelChanged?.Invoke(this, EventArgs.Empty); }
         }
 
         public RidiciSystem RidiciSystem
