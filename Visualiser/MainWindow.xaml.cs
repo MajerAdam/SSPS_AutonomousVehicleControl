@@ -21,9 +21,6 @@ namespace Visualiser
     /// </summary>
     public partial class MainWindow : Window
     {
-        public List<Auto> auta = new List<Auto>();
-        public List<List<Silnice>> trasy = new List<List<Silnice>>();
-
         public MainWindow()
         {
             InitializeComponent();

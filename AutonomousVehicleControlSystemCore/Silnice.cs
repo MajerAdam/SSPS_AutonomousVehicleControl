@@ -13,21 +13,33 @@
         public string Jmeno
         {
             get => jmeno; //jmeno silnice
-            set => jmeno = value;
+            set => SetJmeno(value);
+        }
+        protected virtual void SetJmeno(string value)
+        {
+            jmeno = value;
         }
 
         private double maxRychlost;  // maximální možná rychlost na sinici
         public double MaxRychlost
         {
             get => maxRychlost;
-            set => maxRychlost = value;
+            set => SetMaxRychlost(value);
+        }
+        protected virtual void SetMaxRychlost(double value)
+        {
+            maxRychlost = value;
         }
 
         private double delka; // jak dlouhá je silnice
         public double Delka
         {
             get => delka;
-            set => delka = value;
+            set => SetDelka(value);
+        }
+        protected virtual void SetDelka(double value)
+        {
+            delka = value;
         }
 
         /// <summary>

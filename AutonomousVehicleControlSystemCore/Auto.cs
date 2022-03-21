@@ -12,12 +12,19 @@ namespace AutonomousVehicleControl
         public event EventHandler<EventArgs> StavSvetelChanged;
         public event EventHandler<PoruchaEventArgs> OnPorucha;
         public event EventHandler<EventArgs> OnTrasaDokoncena;
+        public event EventHandler<EventArgs> PolohaChanged;
+        public event EventHandler<EventArgs> JmenoChanged;
 
-        public string Jmeno { get; }
+        private string jmeno;
+        public string Jmeno
+        {
+            get => jmeno;
+            set { jmeno = value; JmenoChanged?.Invoke(this, EventArgs.Empty); }
+        }
         public List<Silnice> Trasa = new List<Silnice>();
         public Silnice CurrSilnice { get; private set; }
 
-        internal Auto(RidiciSystem ridiciSystem, List<Silnice> trasa, string jmeno)
+        internal protected Auto(RidiciSystem ridiciSystem, List<Silnice> trasa, string jmeno)
         {
             RidiciSystem = ridiciSystem;
             Trasa = trasa;
@@ -31,10 +38,11 @@ namespace AutonomousVehicleControl
             set { rychlost = value; RychlostChanged?.Invoke(this, EventArgs.Empty); }
         }
 
+        private Lokace poloha;
         public Lokace Poloha
         {
-            get;
-            set;
+            get => poloha;
+            set { poloha = value; PolohaChanged?.Invoke(this, EventArgs.Empty); }
         }
 
         private bool stavSvetel;

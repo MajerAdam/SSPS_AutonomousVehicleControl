@@ -1,12 +1,111 @@
 ﻿<Window x:Class="Visualiser.MainWindow"
+
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+
         xmlns:local="clr-namespace:Visualiser"
+
         mc:Ignorable="d"
+
         Title="MainWindow" Height="450" Width="800">
+
     <Grid>
-        
+
+        <Grid.RowDefinitions>
+
+            <RowDefinition Height="4*"/>
+
+            <RowDefinition Height="*"/>
+
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+
+            <ColumnDefinition Width="*" />
+
+            <ColumnDefinition Width="*" />
+
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Row="0" Grid.Column="1">
+
+            <Grid.RowDefinitions>
+
+                <RowDefinition Height="*"/>
+
+                <RowDefinition Height="*"/>
+
+
+
+            </Grid.RowDefinitions>
+
+            <Button Margin="20" Grid.Column="0" Grid.Row="0" FontSize="16"
+
+            x:Name="NewCar" Content="Create Car" VerticalAlignment="Top" Width="200" Height="50"/>
+            <TextBlock Text="CarName:" Grid.Row="0" Grid.Column="1" Height="20" VerticalAlignment="Center" />
+
+            <TextBox x:Name="CarName" Grid.Row="0" Grid.Column="1"  Width="200" Height="20"/>
+
+            <Button Margin="20" Grid.Column="0" Grid.Row="1" FontSize="16"
+
+            x:Name="NewRoad" Content="Create Road" VerticalAlignment="Top" Width="200" Height="50"/>
+
+
+
+
+
+
+
+
+
+
+            <Grid Grid.Row="1">
+
+                <Grid.RowDefinitions>
+
+                    <RowDefinition Height="*"/>
+
+                    <RowDefinition Height="*"/>
+
+                    <RowDefinition Height="*"/>
+
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="RoadName:" Grid.Row="1" Grid.Column="1" Height="20" VerticalAlignment="Bottom" />
+                <TextBox x:Name="RoadName" Grid.Row="1" Grid.Column="0"  Width="200" Height="20" VerticalAlignment="Bottom"/>
+
+
+                <TextBlock Text="RoadLength:" Grid.Row="2" Grid.Column="0" Height="20"
+
+
+                            VerticalAlignment="Center"/>
+                <TextBox x:Name="RoadLength" Grid.Row="2" Grid.Column="0"  Width="200" Height="20"
+
+                          VerticalAlignment="Center"/>
+
+
+
+
+
+            </Grid>
+
+        </Grid>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="20" Background="LightGray" />
+
+        <Button Grid.Row="1" HorizontalAlignment="Left" Margin="15"
+
+            x:Name="StartCar" Content="StartCar" Width="170" Height="50" />
+
+        <Button Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Margin="15"
+
+            x:Name="AddRoad" Content="AddRoad" Width="170" Height="50" />
+
     </Grid>
+
 </Window>
